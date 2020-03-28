@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<title></title>
+	</head>
+	<style type="text/css">
+		.container {
+			margin: 0;
+			padding: 0;
+		}
+
+		.container .cart {
+			width: 300px;
+			margin: auto;
+		}
+
+		.container .title {
+			background-color: lightblue;
+			height: 40px;
+			line-height: 40px;
+			text-align: center;
+			/*color: #fff;*/
+		}
+
+		.container .total {
+			background-color: #FFCE46;
+			height: 50px;
+			line-height: 50px;
+			text-align: right;
+		}
+
+		.container .total button {
+			margin: 0 10px;
+			background-color: #DC4C40;
+			height: 35px;
+			width: 80px;
+			border: 0;
+		}
+
+		.container .total span {
+			color: red;
+			font-weight: bold;
+		}
+
+		.container .item {
+			height: 55px;
+			line-height: 55px;
+			position: relative;
+			border-top: 1px solid #ADD8E6;
+		}
+
+		.container .item img {
+			width: 45px;
+			height: 45px;
+			margin: 5px;
+		}
+
+		.container .item .name {
+			position: absolute;
+			width: 90px;
+			top: 0;
+			left: 55px;
+			font-size: 16px;
+		}
+
+		.container .item .change {
+			width: 100px;
+			position: absolute;
+			top: 0;
+			right: 50px;
+		}
+
+		.container .item .change a {
+			font-size: 18px;
+			width: 30px;
+			text-decoration: none;
+			background-color: #d9d9d9;
+			vertical-align: middle;
+		}
+
+		.container .item .change .num {
+			width: 40px;
+			height: 25px;
+			text-align: center;
+		}
+
+		.container .item .del {
+			/* position: absolute;
+	      top: 0;
+	      right: 0px;
+	      width: 40px;
+	      text-align: center;
+	      font-size: 40px;
+	      cursor: pointer;
+	      color: red; */
+			display: none;
+			position: absolute;
+			top: 0;
+			right: 0px;
+			bottom: 0;
+			width: 40px;
+			height: 40px;
+			margin: auto 0;
+			font-size: 30px;
+			color: #cc9a9a;
+			margin-bottom: 16px;
+			transition: color 0.2s ease-out;
+		}
+
+		.container .item .del:hover {
+			/* background-color: orange; */
+			color: #af5b5e;
+		}
+
+		.container .item .del:after {
+			content: "×";
+		}
+
+		.container .item:hover .del {
+			display: block;
+		}
+	</style>
+	<body>
+		<div id="app">
+			<div class="container">
+				<my-cart></my-cart>
+			</div>
+		</div>
+		<script src="js/vue.js"></script>
+		<script type="text/javascript">
+			/*标题头子组件*/
+			var cartTitle = {
+				props: ['uname'],
+				/*用于从父组件传来值*/
+				template: `
+	                <div class='title'>我的商品</div>
+	            `
+			}
+			/*商品列表子组件*/
+			var cartList = {
+				props: ['list'],
+				template: `
+	                <div>
+	                    <div v-bind:key='item.id' v-for='item in list' class="item"><!-- 遍历展示所有商品 -->
+	                        <img v-bind:src="item.img"/>
+	                        <div class="name">{{item.name}}</div>
+	                        <div class="change">
+	                            <a href="" v-on:click.prevent='sub(item.id)'>－</a><!-- 阻止a标签原有跳转，并在点击时，触发sub方法-->
+	                            <input type="text" class="num" v-on:blur='changeNum(item.id,$event)' v-bind:value='item.num' /><!-- 在失去焦点时触发changeNum方法，通过$event传递原有数据值-->
+	                            <a href="" v-on:click.prevent='add(item.id)'>＋</a>
+	                        </div>
+	                        <div class="del" v-on:click='del(item.id)'></div><!-- 删除商品-->
+	                    </div>
+	                </div>
+	            `,
+				methods: {
+					sub: function(id) {
+						this.$emit('change_num', { 
+							id: id,
+							type: 'sub'
+						})
+					},
+					add: function(id) {
+						this.$emit('change_num', {
+							id: id,
+							type: 'add'
+						})
+					},
+					changeNum: function(id, event) {
+						this.$emit('change_num', { 
+							id: id,
+							num: event.target.value,
+							type: 'change'
+						});
+					},
+					del: function(id) {
+						this.$emit('cart-del', id); 
+					}
+				}
+			}
+
+			/*结算子组件*/
+			var cartTotal = {
+				props: ['list'],
+				template: `
+	                    <div class="total">
+	                        <span>总价：{{total}}</span>
+	                        <button>结算</NOtton>
+	                    </div>
+	            `,
+				/*计算方法*/
+				computed: { 
+					total: function() {
+						var t = 0;
+						this.list.forEach(item => {
+							t += item.price * item.num;
+						});
+						return t;
+					}
+				}
+			}
+			Vue.component('my-cart', { 
+				/*商品列表数据*/
+				data: function() {
+					return {
+						uname: 'ben',
+						list: [{
+								id: 1,
+								name: '小狗玩偶',
+								price: 55,
+								num: 1,
+								img: 'img/1.jpg'
+							},
+							{
+								id: 2,
+								name: ' 南瓜灯',
+								price: 20,
+								num: 1,
+								img: 'img/2.png'
+							}, {
+								id: 3,
+								name: '钢琴',
+								price: 1000,
+								num: 1,
+								img: 'img/3.png'
+							}, {
+								id: 4,
+								name: '咖啡杯',
+								price: 10,
+								num: 1,
+								img: 'img/4.png'
+							}, {
+								id: 5,
+								name: '水杯',
+								price: 5,
+								num: 2,
+								img: 'img/5.jpg'
+							}
+							
+						]
+					}
+				},
+
+				template: `
+	                <div>
+	                    <cart-title v-bind:uname='uname'></cart-title>
+	                    <cart-list v-bind:list='list' v-on:cart-del='delCart($event)' v-on:change_num='changeNum($event)'></cart-list>
+	                    <cart-total v-bind:list='list'></cart-total>
+	                </div>
+	            `,
+				components: {
+					'cart-title': cartTitle,
+					'cart-list': cartList,
+					'cart-total': cartTotal
+				},
+				methods: {
+					/*加减商品数量*/
+					changeNum: function(val) {
+						if (val.type == 'change') {
+							this.list.some(item => {
+								if (item.id == val.id) {
+									item.num = val.num;
+									return true;
+								}
+							});
+						} else if (val.type == 'sub') {
+							this.list.some(item => {
+								if (item.id == val.id) {
+									item.num -= 1
+								}
+							})
+						} else {
+							this.list.some(item => {
+								if (item.id == val.id) {
+									item.num += 1
+								}
+							})
+						}
+					},
+					/*删除商品*/
+					delCart: function(id) {
+						var index = this.list.findIndex(item => {
+							return item.id == id;
+						});
+						this.list.splice(index, 1);
+					}
+				}
+			});
+			var app = new Vue({
+				el: '#app',
+				data: {
+
+				}
+			});
+		</script>
+	</body>
+
+</html>

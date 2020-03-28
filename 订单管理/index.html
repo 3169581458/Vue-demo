@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8" />
+		<title></title>
+
+	</head>
+	<style>
+		* {
+						margin: 0;
+						padding: 0;
+					}
+					.box1{
+						width: 800px;
+					}
+					table {
+						width: 600px;
+						height: auto;
+						border-collapse: collapse;
+						/* margin: 0 auto; */
+						margin-bottom: 20px;
+						margin-top: 20px;
+					}
+					
+					table td {
+						text-align: center;
+						border: 1px solid grey;
+		
+					}
+		
+					.box3 button {
+						font-size: 12px;
+						background-color: aliceblue;
+					}
+					.box3{
+						float: left;
+					}
+					.box4{
+					float: right;
+					}
+	</style>
+	<body>
+		<div id="app">
+			<div class="box1">
+				<p style="background-color: skyblue; color: white;">订单管理</p><br>
+				<div class="box2">
+					<!-- 查询商品 -->
+					品牌:<input type="text" v-model="select" placeholder="输入查询的品牌名称" />
+					<button @click="search" style="background-color: skyblue; color: white;">查询</button>
+				</div>
+				<hr />
+				<div class="box3">
+					<table>
+						<!-- 订单列表 -->
+						<thead>
+							<tr>
+								<th>品牌</th>
+								<th>订单日期</th>
+								<th>订单价格</th>
+								<th>购买数量</th>
+								<th>操作</th>
+							</tr>
+						</thead>
+						<tbody>
+							<!-- 订单详情 -->
+							<tr v-for="(item,index) in goods">
+								<td v-once>{{item.name}}</td>
+								<td v-once>{{item.time | yyyyMMdd}}</td>
+								<td v-once>{{item.price}}</td>
+								<td><button @click="del(index)">➖</button>
+									<span v-once>{{item.num}}</span>
+									<button @click="add(index)">➕</button></td>
+								<td><button v-on:click="delet(index)">删除</button></td>
+							</tr>
+						</tbody>
+					</table><br>
+					<!-- 总计 -->
+					<span>总计：{{allprice}}元</span>
+				</div>
+				<div class="box4">
+					<h3>新增订单</h3><br>
+
+					<p>品牌</p>
+					<input type="text" v-model="name" placeholder="例如：华为，三星" /><br>
+					<p>订单价格</p>
+					<input type="number" v-model="price" placeholder="例如：1999" /><br>
+					<p>数量</p>
+					<input type="number" v-model="num" placeholder="例如：2" /><br>
+					<button @click="submit" style="background-color:skyblue; color: white;">提交</button>
+					<!-- <button @click="remove" style="background-color:skyblue; color: white;">重置</button> -->
+				</div>
+
+			</div>
+		</div>
+		<script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+		<script>
+			var app = new Vue({
+				el: '#app',
+				data: {
+					allPrice: '',
+					item: {
+						name: '',
+						time: '',
+						price: '',
+						num: ''
+					},
+					goods: [{
+						'name': '笔记本',
+						'time': '2020-03-19-20:4',
+						'price': 1,
+						'num': 1,
+					}, ],
+				},
+				methods: {
+					add: function(index) {
+						this.goods[index].num++;
+					},
+
+					del: function(index) {
+						if (this.goods[index].num <= 0) {
+							this.goods.splice(index, 1);
+						} else {
+							this.goods[index].num--;
+						}
+					},
+
+					submit: function() {
+						var date = new Date();
+						var seperator1 = "-";
+						var year = date.getFullYear();
+						var month = date.getMonth() + 1;
+						var strDate = date.getDate();
+						if (month >= 1 && month <= 9) {
+							month = "0" + month;
+						}
+						if (strDate >= 0 && strDate <= 9) {
+							strDate = "0" + strDate;
+						}
+						var currentdate = year + seperator1 + month + seperator1 + strDate + - +date.getHours() + ":" + date.getMinutes();
+
+						this.goods.push({
+							name: this.name,
+							time: currentdate,
+							price: this.price,
+							num: this.num,
+						})
+
+					},
+
+					delet: function(index) {
+						this.goods.splice(index, 1)
+					},
+
+					search: function() {
+						var item;
+						for (let i = 0; i < this.goods.length; i++) {
+							if ((this.goods[i].name == this.select) && this.select != -1) {
+								item = this.goods[i];
+								this.goods.splice(0, this.goods.length);
+								this.goods.push(item);
+							}
+						}
+					},
+				},
+				computed: {
+					'allprice': function() {
+						this.allPrice = 0;
+						for (var i = 0; i < this.goods.length; i++) {
+							this.allPrice += this.goods[i].price * this.goods[i].num;
+						}
+						return this.allPrice;
+					},
+
+				},
+			})
+		</script>
+	</body>
+</html>
